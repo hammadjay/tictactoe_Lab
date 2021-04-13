@@ -1,16 +1,34 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert,Pressable, Modal , StyleSheet, Text, View } from 'react-native';
 
 
-const Grid =["","","","","","","","",""]
-const drawGrid = [false,false,false,false,false,false,false,false,false]
+var Grid =["","","","","","","","",""]
+var P1score = 0
+var P2score = 0
 
 export default function App() {
   const [playerTurn,setPlayerTurn] = useState(true);
-  const [gameOver,setGameOver] = useState(false);
-  const [symbol, setSymbol] = useState("X");
  
+  const [symbol, setSymbol] = useState("X");
+  const [modalVisible, setModalVisible] = useState(false);
+ 
+  const playAgain = () =>{
+    Grid =["","","","","","","","",""]
+    setSymbol("X")
+    setPlayerTurn(true)
+    setModalVisible(false)
+
+  }
+  const ResetplayAgain = () =>{
+    Grid =["","","","","","","","",""]
+    setSymbol("X")
+    setPlayerTurn(true)
+    setModalVisible(false)
+    P1score=0
+    P2score=0
+
+  }
   const checkWinner = () =>{
       const winCombo = [[0,4,8],[1,4,7],[2,4,6],[0,3,6],[2,5,8],[0,1,2],[3,4,5],[6,7,8]]
       for (let i=0 ; i<winCombo.length ; i++){
@@ -41,6 +59,18 @@ export default function App() {
     }
   }
 
+  const GameOverMsg = ()=>{
+    
+    if(checkWinner()){
+      return playerTurn ? "Player 1 wins" : "Player 2 wins"
+    }
+    else{
+      return "Match Drawn"
+    }
+    
+    
+  }
+
   const checkMove = (gridNo) => {
     if(playerTurn){
       console.log(Grid[gridNo].length)
@@ -50,10 +80,13 @@ export default function App() {
         
         if(checkWinner()){
           console.log("Player 1 won")
+          P1score++
+          setModalVisible(true)
         }
         else if(checkDraw()){
-          
           console.log("match drawn")
+          setModalVisible(true)
+
         }
         else{
           setSymbol("O")
@@ -63,7 +96,7 @@ export default function App() {
       else{
         alert("illegal Move")
       }
-      
+      console.log("hello")
     }
     else{
       if(Grid[gridNo].length < 1){
@@ -71,10 +104,14 @@ export default function App() {
         console.log("player 2",Grid)
         if(checkWinner()){
           console.log("Player 2 won")
+          P2score++
+          setModalVisible(true)
+
         }
         else if(checkDraw()){
-          
           console.log("match drawn")
+          setModalVisible(true)
+
         }
         else{
           setSymbol("X")
@@ -91,7 +128,8 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.scoreOXStyle}>0 : 0</Text>
+      
+      <Text style={styles.scoreOXStyle}>{P1score} : {P2score}</Text>
       <View style={styles.TicTacBoard}>
         <View style={{flexDirection:'row'}}>
         <Pressable onPress={()=>{checkMove(0)}} style={styles.PressableStyle}><Text style={styles.scoreOXStyle}>{Grid[0]}</Text></Pressable>
@@ -112,6 +150,31 @@ export default function App() {
       </View>
 
         <Text style={styles.turn}>{checkTurn()}</Text>
+        <View style={styles.centeredView}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>{GameOverMsg()}</Text>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={playAgain}
+            >
+              <Text style={styles.textStyle}>Play Again</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={ResetplayAgain}
+            >
+              <Text style={styles.textStyle}>Reset and Play</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+    </View>
     </View>
   );
 }
@@ -146,5 +209,50 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
     marginTop:10
+  }
+  ,
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 8,
+    marginTop:5
+  },
+  buttonOpen: {
+    backgroundColor: "#F194FF",
+  },
+  buttonClose: {
+    backgroundColor: "#2196F3",
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    fontSize:30,
+    fontWeight:'bold',
+    textAlign: "center"
   }
 });
